@@ -1,10 +1,10 @@
 <?php
 //namespace App\Api\V1\Controllers;
 namespace App\Http\Controllers;
-use Symfony\Component\HttpFoundation\Response;
 use App\Models\PatientsModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PatientsModelController extends Controller
@@ -15,7 +15,7 @@ class PatientsModelController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   
+    {
 
         $students = PatientsModel::get()->toJson(JSON_PRETTY_PRINT);
         return response($students, 200);
@@ -38,7 +38,6 @@ class PatientsModelController extends Controller
     {
 
         $data = $request->only('name', 'email', 'address', 'patient_code');
-      
 
         $validator = Validator::make($data, [
             'name' => 'required|max:255',
@@ -48,15 +47,14 @@ class PatientsModelController extends Controller
         ]);
 
         if ($validator->fails()) {
-            throw new NotFoundHttpException; 
+            throw new NotFoundHttpException;
         }
 
         $patient = PatientsModel::create($request->all());
 
         return response()->json([
-            "message" => "Patient record created"
-          ], 201);
-       
+            "message" => "Patient record created",
+        ], 201);
 
     }
 
@@ -71,15 +69,13 @@ class PatientsModelController extends Controller
         if (PatientsModel::where('id', $id)->exists()) {
             $student = PatientsModel::where('id', $id)->get()->toJson(JSON_PRETTY_PRINT);
             return response($student, 200);
-          } else {
+        } else {
             return response()->json([
-              "message" => "Ooops, Patient not found"
+                "message" => "Ooops, Patient not found",
             ], 404);
-          }
+        }
     }
 
-
-    
     /**
      * Update the specified resource in storage.
      *
@@ -88,7 +84,8 @@ class PatientsModelController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function real(Request $request, $id){
+    public function real(Request $request, $id)
+    {
         if (PatientsModel::where('id', $id)->exists()) {
             $patient = PatientsModel::find($id);
             $patient->name = is_null($request->name) ? $patient->name : $request->name;
@@ -96,48 +93,58 @@ class PatientsModelController extends Controller
             $patient->patient_code = is_null($request->patient_code) ? $patient->patient_code : $request->patient_code;
             $patient->address = is_null($request->address) ? $patient->address : $request->address;
             $patient->save();
-    
+
             return response()->json([
-                "message" => "records updated successfully"
-            ], 200);
-            } else {
+                'success' => true,
+                'message' => 'Patient updated successfully',
+                'data' => $patient,
+            ], Response::HTTP_OK);
+
+        } else {
             return response()->json([
-                "message" => "Patient not found"
+                "message" => "Patient not found",
             ], 404);
-            
+
         }
-     }
+    }
 
+    public function deletePatient($id)
+    {
 
-
-     public function deletePatient($id){
-
-        if(PatientsModel::where('id', $id)->exists()) {
+        if (PatientsModel::where('id', $id)->exists()) {
             $student = PatientsModel::find($id);
             $student->delete();
-    
+
             return response()->json([
-              "message" => "records deleted"
+                "message" => "records deleted",
             ], 202);
-          } else {
+        } else {
+
             return response()->json([
-              "message" => "Patient not found"
-            ], 404);
-          }
+                'success' => false,
+                'message' => 'Sorry, Patient not found.',
+            ], 400);
 
-     }
+        }
 
+    }
 
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
-            'email' => 'required|email'
+            'email' => 'required|email',
         ]);
         $article = PatientsModel::findOrFail($id);
+
         $article->update($request->all());
-        return response()->json('updated successfully', 200);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Patient Information updated successfully',
+            'data' => $article,
+        ], Response::HTTP_OK);
 
     }
 
@@ -150,25 +157,15 @@ class PatientsModelController extends Controller
     public function destroy(PatientsModel $patientsModel, $id)
     {
         if (!empty($id)) {
-
             $patient = $patientsModel::find($id);
-           
             if ($patient) {
-
                 $patient->delete();
                 return response()->json('Successfully deleted patient', 200);
-
             } else {
-
                 return response()->json('Sorry that record is not found, try again ...', 201);
-
             }
-
         } else {
-
-            // $patientsModel::find($id)->delete();
             return response()->json('Please check your unique indentification properly', 201);
-
         }
     }
 }

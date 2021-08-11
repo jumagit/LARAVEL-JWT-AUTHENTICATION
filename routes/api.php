@@ -1,6 +1,8 @@
 
 <?php
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PatientsModelController;
+
 Route::post('auth/login', [AuthController::class, 'login'])->middleware(['cors']);
 
 // Route::post('login', [AuthController::class,'login'])->middleware('api');
